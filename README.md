@@ -7,7 +7,8 @@ A web-based tool to convert images into ASCII art with customizable options like
 - Adjust brightness, contrast, and output width.
 - Save ASCII art as an image or text file.
 
-## Live Demo [Try it here!](https://zhihong141.github.io/AsciiArt-Converter-Revamped//) 
+## Live Demo 
+[Try it here!](https://zhihong141.github.io/AsciiArt-Converter-Revamped//) 
 
 ## How to Run Locally 
 1. Clone this repository. 
