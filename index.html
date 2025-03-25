@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="kohzhihong" content="Sevenfour">
+    <meta name="description" content="An advanced ASCII Art Converter tool created by Sevenfour. Convert images into ASCII art with customizable options like brightness, contrast, edge detection, and more.">
+    <meta name="keywords" content="ASCII Art, Image to ASCII, ASCII Converter, Art Generator">
+    <title>Image to ASCII Converter Revamped</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(to bottom, #6b7280, #374151);
+        color: #f9fafb;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+      #container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+      }
+      h2 {
+        font-family: 'Inter', sans-serif;
+        color: #f5f5f5;
+        margin-bottom: 25px;
+        text-align: center;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+      }
+      #controls {
+        width: 30%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-right: 2px solid rgba(255, 255, 255, 0.3);
+        background-color: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        overflow-y: auto;
+      }
+      #controls > div {
+        padding: 15px;
+        width: 90%;
+        border-radius: 12px;
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+        margin-bottom: 15px;
+      }
+      #controls > div > label {
+        margin-top: 0;
+        color: #ffffff;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      }
+      #ascii-output {
+        width: 70%;
+        padding: 20px;
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 0.85rem;
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        overflow: auto;
+        border-left: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(12px);
+      }
+      #ascii-output::-webkit-scrollbar {
+        width: 8px;
+      }
+      #ascii-output::-webkit-scrollbar-thumb {
+        background-color: #4ade80;
+        border-radius: 4px;
+      }
+      #error-message {
+        color: #ff4d4d;
+        margin-top: 15px;
+        padding: 15px;
+        background-color: rgba(255, 0, 0, 0.08);
+        border: 1px solid rgba(255, 0, 0, 0.2);
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        backdrop-filter: blur(12px);
+        display: none;
+      }
+      input, select, button {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        box-sizing: border-box;
+      }
+      input:focus, select:focus {
+        outline: none;
+        border-color: #4ade80;
+        box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.4);
+      }
+      button:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      }
+      label {
+        color: #ffffff;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 12px;
+        font-size: 1rem;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      }
+      /* Custom Checkbox Styling */
+      input[type="checkbox"] {
+        appearance: none; /* Remove default browser styling */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 24px; /* Larger size */
+        height: 24px;
+        background-color: transparent; /* No background */
+        border: 2px solid #ffffff; /* White border */
+        border-radius: 4px; /* Slightly rounded edges */
+        cursor: pointer;
+        position: relative;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+      input[type="checkbox"]:checked::before {
+        content: '✔'; /* Checkmark symbol */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 18px; /* Larger checkmark */
+        color: #4ade80; /* Green checkmark */
+      }
+      input[type="checkbox"]:hover {
+        border-color: #4ade80; /* Green border on hover */
+      }
+      #zoom-controls {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        align-items: center;
+        justify-content: center;
+        width: 90%;
+      }
+      #zoom-controls button {
+        padding: 12px 18px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        width: auto;
+      }
+      #zoom-level {
+        font-size: 1rem;
+        color: #ffffff;
+        font-weight: 600;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      #save-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+        align-items: center;
+        width: 90%;
+      }
+      #save-controls button {
+        padding: 12px 18px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 8px;
+      }
+      #image-input {
+        margin-bottom: 20px;
+      }
+      .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        border-radius: 8px;
+        text-align: center;
+        z-index: 10;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      }
+      .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 20px;
+        color: #fff;
+      }
+      @media (max-width: 768px) {
+        #container {
+          flex-direction: column;
+          height: auto;
+        }
+        #controls {
+          width: 100%;
+          border-right: none;
+          border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        #ascii-output {
+          width: 100%;
+          border-left: none;
+          border-top: 2px solid rgba(255, 255, 255, 0.3);
+        }
+      }
+      @media (max-width: 480px) {
+        h2 {
+          font-size: 1.5rem;
+        }
+        #ascii-output {
+          font-size: 0.75rem;
+        }
+        input, select, button {
+          font-size: 0.9rem;
+          padding: 10px;
+        }
+        #zoom-controls button {
+          padding: 10px 16px;
+          font-size: 1rem;
+        }
+        #save-controls button {
+          font-size: 1rem;
+        }
+        input[type="checkbox"] {
+          width: 20px;
+          height: 20px;
+        }
+        input[type="checkbox"]:checked::before {
+          font-size: 14px;
+        }
+      }
+      #char-select, #edge-detection-select {
+        color: #000;
+      }
+      #char-select option, #edge-detection-select option {
+        color: #000;
+      }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="controls">
+            <h2>Image to ASCII Converter Revamped</h2>
+            <input type="file" id="image-input" accept="image/*">
+            <div>
+                <label for="density-input">Global Settings</label>
+                <label for="density-input">Pixel Size:</label>
+                <input type="number" id="density-input" value="10" min="5" max="30">
+                <label for="resolution-input">Resolution:</label>
+                <input type="number" id="resolution-input" value="1" min="0.1" max="10" step="0.1">
+                <label for="remove-white-checkbox">Remove White:</label>
+                <input type="checkbox" id="remove-white-checkbox">
+            </div>
+            <div>
+                <label for="brightness-input">Basic Adjustments</label>
+                <label for="brightness-input">Brightness:</label>
+                <input type="number" id="brightness-input" value="1" min="0" max="2" step="0.1">
+                <label for="contrast-input">Contrast:</label>
+                <input type="number" id="contrast-input" value="1" min="0" max="2" step="0.1">
+            </div>
+            <div>
+                <label for="flip-horizontal-checkbox">Transformation</label>
+                <label for="flip-horizontal-checkbox">Flip Horizontal:</label>
+                <input type="checkbox" id="flip-horizontal-checkbox">
+                <label for="flip-vertical-checkbox">Flip Vertical:</label>
+                <input type="checkbox" id="flip-vertical-checkbox">
+            </div>
+            <div>
+                <label for="char-select">Text Style</label>
+                <label for="char-select">Character Set:</label>
+                <select id="char-select">
+                    <option value="default">Default</option>
+                    <option value="detailed">Detailed</option>
+                    <option value="blocks">Blocks</option>
+                    <option value="numbers">Numbers</option>
+                    <option value="bullets">Bullets</option>
+                    <option value="braille">Braille</option>
+                </select>
+                <label for="invert-checkbox">Invert:</label>
+                <input type="checkbox" id="invert-checkbox">
+            </div>
+            <div>
+                <label for="edge-detection-select">Edge Detection:</label>
+                <select id="edge-detection-select">
+                    <option value="none">No Edge Detection</option>
+                    <option value="sobel">Sobel</option>
+                    <option value="dog">DoG (Contour)</option>
+                    <option value="canny">Canny</option>
+                </select>
+            </div>
+            <div id="zoom-controls">
+                Zoom:
+                <button id="zoom-in-button"> + </button>
+                <button id="zoom-out-button"> - </button>
+                <span id="zoom-level">1.0x</span>
+            </div>
+            <div id="save-controls">
+                <button id="save-image-button">Save as Image</button>
+                <button id="save-text-button">Save as Text</button>
+            </div>
+            <footer style="margin-top: 20px; font-size: 0.9em; color: #aaa; text-align: center;">
+                Created by Seven.four © All rights reserved.
+            </footer>
+        </div>
+        <pre id="ascii-output"></pre>
+    </div>
+    <div id="instruction-popup" class="popup">
+        <span class="popup-close">×</span>
+        <p>Use arrow keys to increase or decrease the value.</p>
+    </div>
+    <p id="error-message"></p>
+
+    <script>
+    const imageInput = document.getElementById('image-input');
+    const asciiOutput = document.getElementById('ascii-output');
+    const charSelect = document.getElementById('char-select');
+    const densityInput = document.getElementById('density-input');
+    const invertCheckbox = document.getElementById('invert-checkbox');
+    const errorMessage = document.getElementById('error-message');
+    const resolutionInput = document.getElementById('resolution-input');
+    const removeWhiteCheckbox = document.getElementById('remove-white-checkbox');
+    const brightnessInput = document.getElementById('brightness-input');
+    const contrastInput = document.getElementById('contrast-input');
+    const flipHorizontalCheckbox = document.getElementById('flip-horizontal-checkbox');
+    const flipVerticalCheckbox = document.getElementById('flip-vertical-checkbox');
+    const edgeDetectionSelect = document.getElementById('edge-detection-select');
+    const zoomInButton = document.getElementById('zoom-in-button');
+    const zoomOutButton = document.getElementById('zoom-out-button');
+    const zoomLevelDisplay = document.getElementById('zoom-level');
+    const saveImageButton = document.getElementById('save-image-button');
+    const saveTextButton = document.getElementById('save-text-button');
+    const controls = [
+        densityInput, charSelect, invertCheckbox, resolutionInput,
+        removeWhiteCheckbox, brightnessInput, contrastInput,
+        flipHorizontalCheckbox, flipVerticalCheckbox, edgeDetectionSelect
+    ];
+    const charSets = {
+        default: " .:-=+*#%@",
+        detailed: " `'^\",:;i|!~+?][}{1)(/\\&%$#@",
+        blocks: " ░▒▓█",
+        numbers: " 0123456789",
+        bullets: " •◦●⦿",
+        braille: " ⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵",
+    };
+    let currentImage = null;
+    let originalImageData = null;
+    let zoomLevel = 1;
+    let baseFontSize = 10;
+    asciiOutput.style.fontSize = `${baseFontSize}px`;
+    zoomLevelDisplay.textContent = `${zoomLevel.toFixed(1)}x`;
+
+    imageInput.addEventListener('change', function(e) {
+        errorMessage.style.display = 'none';
+        const file = e.target.files[0];
+        if (file) {
+            currentImage = file;
+            processImage();
+        } else {
+            currentImage = null;
+            originalImageData = null;
+            asciiOutput.textContent = '';
+            zoomLevel = 1;
+            baseFontSize = 10;
+            asciiOutput.style.fontSize = `${baseFontSize}px`;
+            zoomLevelDisplay.textContent = `${zoomLevel.toFixed(1)}x`;
+        }
+    });
+
+    function adjustBrightnessContrast(r, g, b, brightness, contrast) {
+        r = (r - 127.5) * contrast + 127.5 + brightness * 127.5;
+        g = (g - 127.5) * contrast + 127.5 + brightness * 127.5;
+        b = (b - 127.5) * contrast + 127.5 + brightness * 127.5;
+        return [
+            Math.max(0, Math.min(255, r)),
+            Math.max(0, Math.min(255, g)),
+            Math.max(0, Math.min(255, b))
+        ];
+    }
+
+    function applyEdgeDetection(imageData, width, height, method) {
+        if (method === 'none') {
+            return imageData;
+        }
+        const outputData = new Uint8ClampedArray(imageData.length);
+        const kernelSize = 3;
+        const kernelRadius = Math.floor(kernelSize / 2);
+        const kernels = {
+            sobelX: [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]],
+            sobelY: [[-1, -2, -1], [0, 0, 0], [1, 2, 1]],
+            dog: [[0, -1, 0], [-1, 4, -1], [0, -1, 0]],
+            cannyX: [[-1, 0, 1], [0, 0, 0], [1, 0, -1]],
+            cannyY: [[-1, 0, -1], [0, 0, 0], [1, 0, 1]]
+        };
+        let selectedKernelX = kernels.sobelX;
+        let selectedKernelY = kernels.sobelY;
+        if (method === 'dog') {
+            selectedKernelX = kernels.dog;
+            selectedKernelY = kernels.dog;
+        } else if (method === 'canny') {
+            selectedKernelX = kernels.cannyX;
+            selectedKernelY = kernels.cannyY;
+        }
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const pixelIndex = (y * width + x) * 4;
+                let gx = 0;
+                let gy = 0;
+                for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
+                    for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
+                        const sampleX = x + kx;
+                        const sampleY = y + ky;
+                        if (sampleX >= 0 && sampleX < width && sampleY >= 0 && sampleY < height) {
+                            const sampleIndex = (sampleY * width + sampleX) * 4;
+                            gx += originalImageData[sampleIndex] * selectedKernelX[ky + kernelRadius][kx + kernelRadius];
+                            gy += originalImageData[sampleIndex] * selectedKernelY[ky + kernelRadius][kx + kernelRadius];
+                        }
+                    }
+                }
+                let magnitude = Math.sqrt(gx * gx + gy * gy);
+                if (method === 'canny') {
+                    magnitude = magnitude > 50 ? 255 : 0;
+                }
+                outputData[pixelIndex] = magnitude;
+                outputData[pixelIndex + 1] = magnitude;
+                outputData[pixelIndex + 2] = magnitude;
+                outputData[pixelIndex + 3] = 255;
+            }
+        }
+        return outputData;
+    }
+
+    function processImage() {
+        if (!currentImage) return;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = function() {
+            const density = parseInt(densityInput.value);
+            const charSet = charSets[charSelect.value];
+            const invert = invertCheckbox.checked;
+            const resolution = parseFloat(resolutionInput.value);
+            const removeWhite = removeWhiteCheckbox.checked;
+            const brightness = parseFloat(brightnessInput.value);
+            const contrast = parseFloat(contrastInput.value);
+            const flipHorizontal = flipHorizontalCheckbox.checked;
+            const flipVertical = flipVerticalCheckbox.checked;
+            const edgeDetection = edgeDetectionSelect.value;
+
+            if (isNaN(density) || density <= 0) {
+                errorMessage.textContent = "Please enter a valid pixel size.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+            if (isNaN(resolution) || resolution <= 0) {
+                errorMessage.textContent = "Please enter a valid resolution.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+            if (isNaN(brightness)) {
+                errorMessage.textContent = "Please enter a valid brightness value.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+            if (isNaN(contrast)) {
+                errorMessage.textContent = "Please enter a valid contrast value.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+            errorMessage.style.display = 'none';
+
+            let scaledWidth = Math.round(img.width * resolution);
+            let scaledHeight = Math.round(img.height * resolution);
+            canvas.width = scaledWidth;
+            canvas.height = scaledHeight;
+
+            ctx.save();
+            if (flipHorizontal) {
+                ctx.translate(scaledWidth, 0);
+                ctx.scale(-1, 1);
+            }
+            if (flipVertical) {
+                ctx.translate(0, scaledHeight);
+                ctx.scale(1, -1);
+            }
+            ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+            ctx.restore();
+
+            let imageData = ctx.getImageData(0, 0, scaledWidth, scaledHeight).data;
+            originalImageData = new Uint8ClampedArray(imageData);
+            imageData = applyEdgeDetection(imageData, scaledWidth, scaledHeight, edgeDetection);
+
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = scaledWidth;
+            tempCanvas.height = scaledHeight;
+            const newImageData = tempCtx.createImageData(scaledWidth, scaledHeight);
+            newImageData.data.set(imageData);
+            tempCtx.putImageData(newImageData, 0, 0);
+            imageData = tempCtx.getImageData(0, 0, scaledWidth, scaledHeight).data;
+
+            let asciiArt = '';
+            for (let y = 0; y < scaledHeight; y += density) {
+                for (let x = 0; x < scaledWidth; x += density) {
+                    let r = 0, g = 0, b = 0;
+                    let count = 0;
+                    for (let cy = 0; cy < density && y + cy < scaledHeight; cy++) {
+                        for (let cx = 0; cx < density && x + cx < scaledWidth; cx++) {
+                            const pixelIndex = ((y + cy) * scaledWidth + (x + cx)) * 4;
+                            r += imageData[pixelIndex];
+                            g += imageData[pixelIndex + 1];
+                            b += imageData[pixelIndex + 2];
+                            count++;
+                        }
+                    }
+                    if (count > 0) {
+                        r = Math.round(r / count);
+                        g = Math.round(g / count);
+                        b = Math.round(b / count);
+                    }
+                    const adjusted = adjustBrightnessContrast(r, g, b, brightness, contrast);
+                    r = adjusted[0];
+                    g = adjusted[1];
+                    b = adjusted[2];
+                    let avg = (r + g + b) / 3;
+                    if (removeWhite && avg > 200) {
+                        asciiArt += ' ';
+                    } else {
+                        const charIndex = Math.floor((avg / 255) * (charSet.length - 1));
+                        asciiArt += invert ? charSet[charSet.length - 1 - charIndex] : charSet[charIndex];
+                    }
+                }
+                asciiArt += '\n';
+            }
+            asciiOutput.textContent = asciiArt;
+            asciiOutput.style.fontSize = `${baseFontSize}px`;
+        };
+        img.src = URL.createObjectURL(currentImage);
+    }
+
+    densityInput.addEventListener('change', processImage);
+    charSelect.addEventListener('change', processImage);
+    invertCheckbox.addEventListener('change', processImage);
+    resolutionInput.addEventListener('change', processImage);
+    removeWhiteCheckbox.addEventListener('change', processImage);
+    brightnessInput.addEventListener('change', processImage);
+    contrastInput.addEventListener('change', processImage);
+    flipHorizontalCheckbox.addEventListener('change', processImage);
+    flipVerticalCheckbox.addEventListener('change', processImage);
+    edgeDetectionSelect.addEventListener('change', processImage);
+
+    zoomInButton.addEventListener('click', () => {
+        zoomLevel += 0.1;
+        baseFontSize = Math.round(baseFontSize * 1.1);
+        asciiOutput.style.fontSize = `${baseFontSize}px`;
+        zoomLevelDisplay.textContent = `${zoomLevel.toFixed(1)}x`;
+    });
+
+    zoomOutButton.addEventListener('click', () => {
+        if (zoomLevel > 0.2) {
+            zoomLevel -= 0.1;
+            baseFontSize = Math.round(baseFontSize / 1.1);
+            asciiOutput.style.fontSize = `${baseFontSize}px`;
+            zoomLevelDisplay.textContent = `${zoomLevel.toFixed(1)}x`;
+        }
+    });
+
+    saveImageButton.addEventListener('click', () => {
+        if (!currentImage) {
+            alert('Please select an image first.');
+            return;
+        }
+        const asciiText = asciiOutput.textContent;
+        if (!asciiText.trim()) {
+            alert('No ASCII art to save. Please process an image first.');
+            return;
+        }
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const lines = asciiText.split('\n').filter(line => line.trim());
+        const lineHeight = baseFontSize * 1.2;
+        const charWidth = baseFontSize * 0.6;
+        const longestLine = Math.max(...lines.map(line => line.length));
+        canvas.width = longestLine * charWidth + 20;
+        canvas.height = lines.length * lineHeight + 20;
+        ctx.fillStyle = window.getComputedStyle(asciiOutput).backgroundColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = window.getComputedStyle(asciiOutput).color;
+        ctx.font = `${baseFontSize}px monospace`;
+        ctx.textBaseline = 'top';
+        lines.forEach((line, index) => {
+            ctx.fillText(line, 10, 10 + index * lineHeight);
+        });
+        const dataURL = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'ascii_image.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    saveTextButton.addEventListener('click', () => {
+        if (!currentImage) {
+            alert('Please select an image first.');
+            return;
+        }
+        const text = asciiOutput.textContent;
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ascii_text.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (document.activeElement === densityInput) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                densityInput.value = parseInt(densityInput.value) + 1;
+                processImage();
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                densityInput.value = parseInt(densityInput.value) - 1;
+                processImage();
+            }
+        }
+        if (document.activeElement === resolutionInput) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                resolutionInput.value = (parseFloat(resolutionInput.value) + 0.1).toFixed(1);
+                processImage();
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                resolutionInput.value = (parseFloat(resolutionInput.value) - 0.1).toFixed(1);
+                processImage();
+            }
+        }
+        if (document.activeElement === brightnessInput) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                brightnessInput.value = (parseFloat(brightnessInput.value) + 0.1).toFixed(1);
+                processImage();
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                brightnessInput.value = (parseFloat(brightnessInput.value) - 0.1).toFixed(1);
+                processImage();
+            }
+        }
+        if (document.activeElement === contrastInput) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                contrastInput.value = (parseFloat(contrastInput.value) + 0.1).toFixed(1);
+                processImage();
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                contrastInput.value = (parseFloat(contrastInput.value) - 0.1).toFixed(1);
+                processImage();
+            }
+        }
+    });
+
+    window.onload = function() {
+        const popup = document.getElementById('instruction-popup');
+        const closeBtn = popup.querySelector('.popup-close');
+        popup.style.display = 'block';
+        closeBtn.onclick = function() {
+            popup.style.display = 'none';
+        };
+        window.onclick = function(event) {
+            if (event.target === popup) {
+                popup.style.display = 'none';
+            }
+        };
+    };
+    </script>
+</body>
+</html>
